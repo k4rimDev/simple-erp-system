@@ -9,6 +9,16 @@
 <body>
     <header>
         <h1>ERP System</h1>
+        <nav>
+            <ul>
+                <li><a href="{% url 'index' %}">Dashboard</a></li>
+                <li><a href="{% url 'customers' %}">Customers</a></li>
+                <li><a href="{% url 'products' %}">Products</a></li>
+                <li><a href="{% url 'orders' %}">Orders</a></li>
+                <li><a href="{% url 'invoices' %}">Invoices</a></li>
+                <li><a href="{% url 'payments' %}">Payments</a></li>
+            </ul>
+        </nav>
     </header>
     <main>
         {% block content %}{% endblock %}

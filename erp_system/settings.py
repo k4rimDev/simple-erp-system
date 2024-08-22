@@ -9,6 +9,7 @@ https://docs.djangoproject.com/en/4.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.1/ref/settings/
 """
+import os
 
 from pathlib import Path
 
@@ -24,17 +25,20 @@ SECRET_KEY = 'django-insecure-y-nd_^-cwqea5+!v54*ar!y488^t915hvmjib(z*ntqs^b9sdp
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-
-ALLOWED_HOSTS = ["*"]
+PROD = int(os.environ.get("PROD", default=0))
+ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "*").split(",")
 
 
 # Application definition
 
-INITIAL_APPS = [
+LOCAL_APPS = [
     'core'
 ]
 
 THIRD_PARTY_APPS = [
+    'celery',
+    'django_celery_results',
+    'django_celery_beat',
     'rest_framework',
     'corsheaders'
 ]
@@ -47,7 +51,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    *INITIAL_APPS,
+    *LOCAL_APPS,
     *THIRD_PARTY_APPS
 ]
 
@@ -56,6 +60,7 @@ MIDDLEWARE = [
     'django.contrib.sessions.middleware.SessionMiddleware',
     # Cors middleware
     'corsheaders.middleware.CorsMiddleware',
+    
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -87,12 +92,25 @@ WSGI_APPLICATION = 'erp_system.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+if DEBUG:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
     }
-}
+
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql_psycopg2',
+            'NAME': str(os.getenv('POSTGRES_DB')),
+            'USER': str(os.getenv('POSTGRES_USER')),
+            'PASSWORD': str(os.getenv('POSTGRES_PASSWORD')),
+            'HOST': str(os.getenv('POSTGRES_HOST')),
+            'PORT': '5432',
+        }}
+
 
 
 # Password validation
@@ -130,6 +148,16 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
 STATIC_URL = 'static/'
+
+if not PROD:
+    STATIC_ROOT = os.path.join(BASE_DIR, "static")
+else:
+    STATICFILES_DIRS = [
+        os.path.join(BASE_DIR, "static")
+    ]
+
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
