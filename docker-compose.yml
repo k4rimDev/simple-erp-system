@@ -1,0 +1,60 @@
+version: "3.1"
+
+services:
+  db:
+    container_name: postgres-db
+    image: postgres:13-alpine
+    restart: always
+    ports:
+      - 5432:5432
+    volumes:
+      - ./pgdb:/var/lib/postgresql/data
+    env_file: .env
+    environment:
+      - LC_ALL=C.UTF-8
+
+  web:
+    container_name: web
+    build: .
+    restart: "always"
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/code
+      - ./static/:/code/static/
+      - ./media/:/code/media/
+    links:
+      - db
+    env_file: .env
+    depends_on:
+      - db
+
+  redis:
+    build:
+      context: .
+      dockerfile: redis.dockerfile
+      args:
+        REDIS_PASSWORD: ${REDIS_PASSWORD}
+        REDIS_PORT: ${REDIS_PORT}
+    restart: "always"
+    container_name: redis
+    ports:
+      - ${REDIS_PORT}:${REDIS_PORT}
+    volumes:
+      - ./redisdb:/var/lib/redis
+
+  celery:
+    restart: "always"
+    build:
+      context: .
+      dockerfile: celery.dockerfile
+    container_name: celery
+    env_file: .env
+    command: >
+      sh -c "/venv/bin/celery --app=erp_system.celery:app worker -B --loglevel=INFO"
+    volumes:
+      - .:/code
+    links:
+      - redis
+    depends_on:
+      - "redis"

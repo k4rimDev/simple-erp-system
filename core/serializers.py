@@ -2,14 +2,8 @@ from rest_framework import serializers
 
 from core.models import (
     Customer, Product, Order, 
-    OrderItem, Invoice, Document
+    OrderItem, Invoice, Payment
 )
-
-
-class DocumentSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Document
-        fields = '__all__'
 
 
 class CustomerSerializer(serializers.ModelSerializer):
@@ -42,10 +36,17 @@ class OrderSerializer(serializers.ModelSerializer):
         order = Order.objects.create(**validated_data)
         for item_data in items_data:
             OrderItem.objects.create(order=order, **item_data)
+        order.calculate_total()
         return order
 
 
 class InvoiceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Invoice
+        fields = '__all__'
+
+
+class PaymentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Payment
         fields = '__all__'
