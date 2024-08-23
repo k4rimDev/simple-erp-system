@@ -110,6 +110,20 @@ else:
             'HOST': str(os.getenv('POSTGRES_HOST')),
             'PORT': '5432',
         }}
+    
+
+CORS_ORIGIN_ALLOW_ALL = True
+
+CORS_ALLOW_CREDENTIALS = True
+
+CORS_ALLOW_METHODS = [
+    'DELETE',
+    'GET',
+    'OPTIONS',
+    'PATCH',
+    'POST',
+    'PUT',
+]
 
 
 

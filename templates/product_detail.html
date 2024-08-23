@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block title %}{{ product.name }} Details{% endblock %}
+
+{% block content %}
+    <h2>{{ product.name }}</h2>
+    <p><strong>SKU:</strong> {{ product.sku }}</p>
+    <p><strong>Description:</strong> {{ product.description }}</p>
+    <p><strong>Price:</strong> ${{ product.price }}</p>
+    <p><strong>Stock:</strong> {{ product.stock }}</p>
+    <img src="{{ product.image.url }}" alt="{{ product.name }}" class="img-fluid object-fit-cover" style="width:100%; height:300px;" >
+
+    <a href="{% url 'product_edit' product.pk %}" class="btn btn-primary">Edit</a>
+    <a href="{% url 'product_delete' product.pk %}" class="btn btn-danger">Delete</a>
+{% endblock %}
